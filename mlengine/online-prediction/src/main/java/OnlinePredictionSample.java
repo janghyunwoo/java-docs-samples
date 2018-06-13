@@ -37,6 +37,8 @@ import java.io.File;
 
 public class OnlinePredictionSample {
   public static void main(String[] args) throws Exception {
+	  System.out.println(System.getenv("GOOGLE_APPLICATION_CREDENTIALS"));
+	  
     HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
     JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
     Discovery discovery = new Discovery.Builder(httpTransport, jsonFactory, null).build();
@@ -45,13 +47,14 @@ public class OnlinePredictionSample {
     RestMethod method = api.getResources().get("projects").getMethods().get("predict");
 
     JsonSchema param = new JsonSchema();
-    String projectId = "YOUR_PROJECT_ID";
+    String projectId = "hypnotic-maker-206205";
     // You should have already deployed a model and a version.
     // For reference, see https://cloud.google.com/ml-engine/docs/deploying-models.
-    String modelId = "YOUR_MODEL_ID";
+    String modelId = "census";
     String versionId = "YOUR_VERSION_ID";
     param.set(
-        "name", String.format("projects/%s/models/%s/versions/%s", projectId, modelId, versionId));
+//        "name", String.format("projects/%s/models/%s/versions/%s", projectId, modelId, versionId));
+    	  "name", String.format("projects/%s/models/%s", projectId, modelId));
 
     GenericUrl url =
         new GenericUrl(UriTemplate.expand(api.getBaseUrl() + method.getPath(), param, true));
@@ -62,9 +65,14 @@ public class OnlinePredictionSample {
     HttpContent content = new FileContent(contentType, requestBodyFile);
     System.out.println(content.getLength());
 
+    
     GoogleCredential credential = GoogleCredential.getApplicationDefault();
+    System.out.println(credential);
+//    GoogleCredential credential = GoogleCredential.getApplicationDefault(httpTransport, jsonFactory);
     HttpRequestFactory requestFactory = httpTransport.createRequestFactory(credential);
+    System.out.println(requestFactory);
     HttpRequest request = requestFactory.buildRequest(method.getHttpMethod(), url, content);
+    System.out.println(request);
 
     String response = request.execute().parseAsString();
     System.out.println(response);
